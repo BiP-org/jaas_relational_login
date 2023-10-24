@@ -45,7 +45,7 @@ public class PGCryptLogin extends SimpleLogin
 			   con = DriverManager.getConnection(dbURL);
 
 			psu = con.prepareStatement("SELECT " + userColumn + " FROM " + userTable +
-									   " WHERE " + userColumn + "=? AND " +
+									   " WHERE " + userColumn + " ILIKE ? AND " +
 									   passColumn + "=crypt(?, "+passColumn +")" + where);
 
             String pw = String.valueOf(password);
