@@ -44,13 +44,16 @@ public class PGCryptLogin extends SimpleLogin
 			else
 			   con = DriverManager.getConnection(dbURL);
 
-			psu = con.prepareStatement("SELECT " + userColumn + " FROM " + userTable +
-									   " WHERE " + userColumn + " ILIKE ? AND " +
-									   passColumn + "=crypt(?, "+passColumn +")" + where);
+			// use username and upn as loginid
+            psu = con.prepareStatement("SELECT DISTINCT a.username FROM public.authentication a " + 
+                                      "LEFT JOIN public.idpush_upn u ON a.personid = u.personid " + 
+                                      "WHERE (a.username ILIKE ? OR u.upn ILIKE ?) " +
+                                      "AND a.password=crypt(?, "+passColumn +")");
 
             String pw = String.valueOf(password);
 			psu.setString(1, username);
-			psu.setString(2, pw);
+			psu.setString(2, username);
+			psu.setString(3, pw);
 			rsu = psu.executeQuery();
 			String executedQuery = rsu.getStatement().toString();
 			if (debug_unsafe){
