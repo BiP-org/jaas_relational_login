@@ -44,11 +44,12 @@ public class PGCryptLogin extends SimpleLogin
 			else
 			   con = DriverManager.getConnection(dbURL);
 
-			// use username and upn as loginid
-            psu = con.prepareStatement("SELECT DISTINCT a.username FROM public.authentication a " + 
-                                      "LEFT JOIN public.idpush_upn u ON a.personid = u.personid " + 
-                                      "WHERE (a.username ILIKE ? OR u.upn ILIKE ?) " +
-                                      "AND a.password=crypt(?, "+passColumn +")");
+			// use username and upn as loginid                      
+            psu = con.prepareStatement("WITH candidates AS MATERIALIZED (SELECT a.* FROM public.authentication a" + 
+                    "LEFT JOIN public.idpush_upn u ON a.personid = u.personid " + 
+                    "WHERE lower(a.username) = lower(?) OR lower(u.upn) = lower(?))" +
+                    "SELECT username FROM candidates WHERE" +
+                    "password=crypt(?, "+passColumn +")");
 
             String pw = String.valueOf(password);
 			psu.setString(1, username);
